@@ -2,9 +2,7 @@
   (:require cljs.pprint
             [reagent.core :as r]
             [reagent.dom :as rd]
-            [dvorak.translator :as d]
-            [clojure.core.async :as async]
-            [goog.events.KeyCodes :as key-codes]))
+            [dvorak.translator :as d]))
 
 (def state
   (r/atom {:input ""
