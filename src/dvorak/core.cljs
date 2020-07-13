@@ -49,7 +49,3 @@
               (r/cursor state [:enlightenment])]
              (.getElementById js/document "app")))
 
-(comment
-  (def r (mountit))
-  )
-
