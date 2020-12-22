@@ -45,24 +45,25 @@
     {:value     @input-ratom
      :on-change (fn [new]
                   (let [new-txt (.-value (.-target new))]
-                    (reset! input-ratom new-txt)
-                    (reset! output-ratom (d/convert (:table @state) new-txt))))}
+                    (reset! input-ratom new-txt)))}
     ]
    [:h3 "This is your QWERTY=>Dvorak simulated text"]
    [:textarea
-    {:value    @output-ratom
+    {:value    (let [o (d/convert @table @input-ratom)]
+                 (reset! output-ratom o)
+                 )
      :disabled true}]
    [:h3 "Try entering the text above into this textbox .."]
    [:textarea
     {:value     @tr-ratom
      :on-change (fn [evt]
                   (let [new-txt (.-value (.-target evt))]
-                    (reset! tr-ratom new-txt)
-                    (reset! dest-atom (d/convert (:r-table @state) new-txt))))
+                    (reset! tr-ratom new-txt)))
      }]
    [:h3 ".. which is as if you typed the original input in Dvorak"]
    [:textarea
-    {:value    @dest-atom
+    {:value    (let [d (d/convert @r-table @tr-ratom)]
+                 (reset! dest-atom d))
      :disabled true}
     ]
    ])
