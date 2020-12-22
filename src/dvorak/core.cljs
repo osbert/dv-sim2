@@ -8,8 +8,29 @@
   (r/atom {:input   ""
            :output  ""
            :tr      ""
-           :table   (d/make-table :dvorak :qwerty)
-           :r-table (d/reverse-table (d/make-table :dvorak :qwerty))}))
+           :table   nil
+           :r-table nil}))
+
+(defn kb-selector
+  [table r-table]
+  (let [choices [:dvorak :colemak]]
+    (r/create-class {:component-did-mount
+                     (fn []
+                       (reset! table (d/make-table (first choices) :qwerty))
+                       (reset! r-table (d/make-table :qwerty (first choices)))
+                       )
+                     :reagent-render
+                     (fn [table r-table]
+                       [:select.form-control {:field     :list
+                                              :id        :many.options
+                                              :on-change (fn [new]
+                                                           (let [to-kb     (.-value (.-target new))
+                                                                 new-table (d/make-table (keyword to-kb) :qwerty)]
+                                                             (reset! table new-table)
+                                                             (reset! r-table (d/reverse-table new-table))))}
+                        (for [x choices]
+                          [:option {:key x} (name x)])]
+                       )})))
 
 (defn root-component
   [table r-table input-ratom output-ratom tr-ratom dest-atom]
@@ -17,15 +38,8 @@
    [:h3 "option list"]
    [:div.form-group
     [:label "pick a source keyboard"]
-    [:select.form-control {:field     :list
-                           :id        :many.options
-                           :on-change (fn [new]
-                                        (let [to-kb     (.-value (.-target new))
-                                              new-table (d/make-table (keyword to-kb) :qwerty)]
-                                          (reset! table new-table)
-                                          (reset! r-table (d/reverse-table new-table))))}
-     [:option {:key :dvorak} "dvorak"]
-     [:option {:key :colemak} "colemak"]]]
+    [kb-selector table r-table]
+    ]
    [:h3 "This is your input textbox."]
    [:textarea
     {:value     @input-ratom
