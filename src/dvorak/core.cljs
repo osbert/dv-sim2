@@ -32,6 +32,24 @@
                           [:option {:key x} (name x)])]
                        )})))
 
+(defn translator
+  [table input-ratom output-ratom]
+  [:div
+   [:h3 "This is your input textbox."]
+   [:textarea
+    {:value     @input-ratom
+     :on-change (fn [new]
+                  (let [new-txt (.-value (.-target new))]
+                    (reset! input-ratom new-txt)))}
+    ]
+   [:h3 "This is your QWERTY=>Dvorak simulated text"]
+   [:textarea
+    {:value    (let [o (d/convert @table @input-ratom)]
+                 (reset! output-ratom o)
+                 )
+     :disabled true}]]
+  )
+
 (defn root-component
   [table r-table input-ratom output-ratom tr-ratom dest-atom]
   (r/create-class
@@ -49,19 +67,7 @@
         [:label "pick a source keyboard"]
         [kb-selector table r-table]
         ]
-       [:h3 "This is your input textbox."]
-       [:textarea
-        {:value     @input-ratom
-         :on-change (fn [new]
-                      (let [new-txt (.-value (.-target new))]
-                        (reset! input-ratom new-txt)))}
-        ]
-       [:h3 "This is your QWERTY=>Dvorak simulated text"]
-       [:textarea
-        {:value    (let [o (d/convert @table @input-ratom)]
-                     (reset! output-ratom o)
-                     )
-         :disabled true}]
+       [translator table input-ratom output-ratom]
        [:h3 "Try entering the text above into this textbox .."]
        [:textarea
         {:value     @tr-ratom
@@ -75,6 +81,7 @@
                      (reset! dest-atom d))
          :disabled true}
         ]
+
        ])}))
 
 (defn mountit []
