@@ -50,6 +50,23 @@
      :disabled true}]]
   )
 
+(defn magic-input
+  [r-table tr-ratom dest-atom]
+  [:div
+   [:h3 "Try entering the text above into this textbox .."]
+   [:textarea
+    {:value     @tr-ratom
+     :on-change (fn [evt]
+                  (let [new-txt (.-value (.-target evt))]
+                    (reset! tr-ratom new-txt)))
+     }]
+   [:h3 ".. which is as if you typed the original input in Dvorak"]
+   [:textarea
+    {:value    (let [d (d/convert @r-table @tr-ratom)]
+                 (reset! dest-atom d))
+     :disabled true}
+    ]])
+
 (defn root-component
   [table r-table input-ratom output-ratom tr-ratom dest-atom]
   (r/create-class
@@ -65,23 +82,9 @@
        [:h3 "option list"]
        [:div.form-group
         [:label "pick a source keyboard"]
-        [kb-selector table r-table]
-        ]
+        [kb-selector table r-table]        ]
        [translator table input-ratom output-ratom]
-       [:h3 "Try entering the text above into this textbox .."]
-       [:textarea
-        {:value     @tr-ratom
-         :on-change (fn [evt]
-                      (let [new-txt (.-value (.-target evt))]
-                        (reset! tr-ratom new-txt)))
-         }]
-       [:h3 ".. which is as if you typed the original input in Dvorak"]
-       [:textarea
-        {:value    (let [d (d/convert @r-table @tr-ratom)]
-                     (reset! dest-atom d))
-         :disabled true}
-        ]
-
+       [magic-input r-table tr-ratom dest-atom]
        ])}))
 
 (defn mountit []
