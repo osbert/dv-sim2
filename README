@@ -1,0 +1,16 @@
+master branch is automatically deployed to https://dvorak.iterinc.com
+
+To develop interactively using CIDER:
+
+M-x cider-jack-in-cljs
+
+Choose browser as the CLJS REPL
+
+By default on startup you should get the CLJS place-holder index -- from your CLJS repl run:
+
+(require 'dvorak.main)
+
+which should then re-draw and allow for interactive development. Note that it
+will NOT auto-reload on changes. After editing a function, be sure to
+re-evaluate it, and then force a re-draw. The most common approach I've taken to
+get it to re-draw are to call dvorak.core/mountit so it will re-draw.
