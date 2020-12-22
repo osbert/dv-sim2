@@ -1,45 +1,19 @@
 (ns dvorak.translator
   (:use [clojure.string :only [lower-case upper-case]]))
 
-(def tr-table
-  {
-   "a" "a"
-   "b" "n"
-   "c" "i"
-   "d" "h"
-   "e" "d"
-   "f" "y"
-   "g" "u"
-   "h" "j"
-   "i" "g"
-   "j" "c"
-   "k" "v"
-   "l" "p"
-   "m" "m"
-   "n" "l"
-   "o" "s"
-   "p" "r"
-   "q" "x"
-   "r" "o"
-   "s" ";"
-   "t" "k"
-   "u" "f"
-   "v" "."
-   "w" ","
-   "x" "b"
-   "y" "t"
-   "z" "/"
-   "." "e"
-   "," "w"
-   "'" "q"
-   "\"" "Q"
-   ";" "z"
-   "<" "W"
-   ">" "E"
-   })
+(def keyboards
+  {:qwerty  "qwertyuiopasdfghjkl;'zxcvbnm,./"
+   :dvorak  "',.pyfgcrlaoeuidhtns-;qjkxbmwvz"
+   :colemak "qwfpgjluy;arstdhneio'zxcvbkm,./"})
 
-(def reverse-tr-table
-  (zipmap (vals tr-table) (keys tr-table)))
+(defn make-table
+  [from-kw to-kw]
+  (zipmap (from-kw keyboards)
+          (to-kw keyboards)))
+
+(defn reverse-table
+  [table]
+  (zipmap (vals table) (keys table)))
 
 (defn char-replace
   [table char]
@@ -49,10 +23,7 @@
           (and table-lower-s (upper-case table-lower-s)))
         s)))
 
-(defn convert-to-dvorak
-  [s]
-  (clojure.string/join (map (partial char-replace tr-table) s)))
+(defn convert
+  [table s]
+  (clojure.string/join (map (partial char-replace table) s)))
 
-(defn simulate-dvorak
-  [s]
-  (clojure.string/join (map (partial char-replace reverse-tr-table) s)))
