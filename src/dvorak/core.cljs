@@ -18,10 +18,18 @@
     (r/create-class {:component-did-mount
                      (fn []
                        (let [c (first choices)]
-                         (reset! table (d/make-table c :qwerty))
-                         (reset! r-table (d/make-table :qwerty c))
-                         (reset! active-keyboard c))
-                       )
+                         ;; This is implemented this way to preserve
+                         ;; state if it has already been set once, but
+                         ;; otherwise bootstrap it correctly 
+                         (comment
+                           ;; NOTE THAT
+                           (fnil identity FOO)
+                           ;; is equivalent to
+                           (fn [old] (if (nil? old) FOO old)))
+
+                         (swap! table (fnil identity (d/make-table c :qwerty)))
+                         (swap! r-table (fnil identity (d/make-table :qwerty c)))
+                         (swap! active-keyboard (fnil identity c))))
                      :reagent-render
                      (fn [table r-table]
                        [:select.form-control {:field     :list
