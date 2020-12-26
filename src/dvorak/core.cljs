@@ -9,15 +9,18 @@
            :output  ""
            :tr      ""
            :table   nil
-           :r-table nil}))
+           :r-table nil
+           :active-keyboard nil}))
 
 (defn kb-selector
-  [table r-table]
+  [table r-table active-keyboard]
   (let [choices [:dvorak :colemak]]
     (r/create-class {:component-did-mount
                      (fn []
-                       (reset! table (d/make-table (first choices) :qwerty))
-                       (reset! r-table (d/make-table :qwerty (first choices)))
+                       (let [c (first choices)]
+                         (reset! table (d/make-table c :qwerty))
+                         (reset! r-table (d/make-table :qwerty c))
+                         (reset! active-keyboard c))
                        )
                      :reagent-render
                      (fn [table r-table]
@@ -27,13 +30,14 @@
                                                            (let [to-kb     (.-value (.-target new))
                                                                  new-table (d/make-table (keyword to-kb) :qwerty)]
                                                              (reset! table new-table)
-                                                             (reset! r-table (d/reverse-table new-table))))}
+                                                             (reset! r-table (d/reverse-table new-table))
+                                                             (reset! active-keyboard to-kb)))}
                         (for [x choices]
                           [:option {:key x} (name x)])]
                        )})))
 
 (defn translator
-  [table input-ratom output-ratom]
+  [table input-ratom output-ratom active-keyboard]
   [:div
    [:h3 "This is your input textbox."]
    [:textarea
@@ -42,7 +46,7 @@
                   (let [new-txt (.-value (.-target new))]
                     (reset! input-ratom new-txt)))}
     ]
-   [:h3 "This is your QWERTY=>Dvorak simulated text"]
+   [:h3 "This is your QWERTY=>" @active-keyboard " simulated text"]
    [:textarea
     {:value    (let [o (d/convert @table @input-ratom)]
                  (reset! output-ratom o)
@@ -51,7 +55,7 @@
   )
 
 (defn magic-input
-  [r-table tr-ratom dest-atom]
+  [r-table tr-ratom dest-atom active-keyboard]
   [:div
    [:h3 "Try entering the text above into this textbox .."]
    [:textarea
@@ -60,7 +64,7 @@
                   (let [new-txt (.-value (.-target evt))]
                     (reset! tr-ratom new-txt)))
      }]
-   [:h3 ".. which is as if you typed the original input in Dvorak"]
+   [:h3 ".. which is as if you typed the original input in " @active-keyboard]
    [:textarea
     {:value    (let [d (d/convert @r-table @tr-ratom)]
                  (reset! dest-atom d))
@@ -68,7 +72,7 @@
     ]])
 
 (defn root-component
-  [table r-table input-ratom output-ratom tr-ratom dest-atom]
+  [table r-table input-ratom output-ratom tr-ratom dest-atom active-keyboard]
   (r/create-class
    {:component-did-mount
     (fn []
@@ -82,9 +86,9 @@
        [:h3 "option list"]
        [:div.form-group
         [:label "pick a source keyboard"]
-        [kb-selector table r-table]        ]
-       [translator table input-ratom output-ratom]
-       [magic-input r-table tr-ratom dest-atom]
+        [kb-selector table r-table active-keyboard]]
+       [translator table input-ratom output-ratom active-keyboard]
+       [magic-input r-table tr-ratom dest-atom active-keyboard]
        ])}))
 
 (defn mountit []
@@ -94,6 +98,7 @@
               (r/cursor state [:input])
               (r/cursor state [:output])
               (r/cursor state [:tr])
-              (r/cursor state [:enlightenment])]
+              (r/cursor state [:enlightenment])
+              (r/cursor state [:active-keyboard])]
              (.getElementById js/document "app")))
 
